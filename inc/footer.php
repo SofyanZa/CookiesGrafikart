@@ -1,0 +1,1 @@
+<h1>Salut je suis le <strong>FOOTER</strong> de ta page ! </h1>

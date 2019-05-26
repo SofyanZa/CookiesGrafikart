@@ -14,6 +14,7 @@ require 'inc/header.php' ?>
 
 <?php if ($nom) : ?>
     <h1>Bonjour <?= htmlentities($nom) ?></h1>
+    <a href="profil.php?action=deconnecter">Se déconnecter</a>
 <?php else: ?>    
 <form action ="" method="post">
     <div class="form-group">

@@ -1,5 +1,8 @@
 # Les cookies
 
+
+![My large image](img/cookiess.jpeg)
+
 Les cookies permettent de sauvegarder une petite quantitée d'information sur la navigateur de l'utilisateur
 
 
@@ -32,6 +35,7 @@ _Nous voulons vérifier, alors on regarde le status 200 pour voir les cookies :_
 ## Etapes
 
 A l'aide la video [https://www.youtube.com/watch?v=LARX660fup0]
+
 Créer un fichier cookie.php
 
 ## Préambule setcookie()
@@ -61,6 +65,9 @@ Donc on a une methode révolutionnaire pour palier à ça !! Cette methode s'app
 - `boo $secure` = FALSE : Si on veut ou non que le cookie soit sécurisé ( peut il être transmis en HTTP )
 - `bool $httponly` = FALSE : cookie accessible en javascript ou non
 
+
+
+
 # Etape 1
 
 On veut essayer de définir un cookie qui contiendrait le nom de l'utilisateur
@@ -75,12 +82,14 @@ On peut définir exactement quand le cookie se détruira grace à `int $expires`
 
 Si on ne spécifie pas ce paramètre, ou si il est égal à 0 alors le cookie expirera à la fin de la session ( lorsque de le navigateur sera férmé )
 
+Donc :
+
 ```php
 setcookie('utilisateur', 'John', time() + 60 * 60 * 24);
 ```
 
 On va ensuite dans la reponse du header de l'inspecteur
-On retrouve ça
+On retrouve ça :
 
     Set-Cookie: utilisateur=John; expires=Mon, 27-May-2019 16:24:17 GMT; Max-Age=86400
 
@@ -88,7 +97,7 @@ _L'age est fixé automatiquement par php_
 
 # Etape 2
 
-Application -> Cookies -> Localhost
+ Dans `Application -> Cookies -> Localhost`
 
 On a bien le cookie qui est présent, nom `utilisateur`, valeur `John`
 
@@ -130,7 +139,7 @@ setcookie('utilisateur', 'John', time() + 60 * 60 * 24);
 Le fait de faire un var_dump($_COOKIE) avant de faire un setcookie() nous renvoie une erreur `Cannot modify header information`, il faut donc inverser et declarer le set cookie avant, meme si il y a un espace entre le bord et `<?php`, ça fera une erreur aussi, alors attention a ne avoir **aucun** contenu avant la manipulation d'entête http.
 
 
-
+________________________________________________
 
 
 ## Simulation
@@ -171,7 +180,7 @@ if (!empty($_COOKIE['utilisateur'])) {
 }
 ```
 
-## Etape 3
+# Etape 3
 
 On doit mettre une nouvelle condition :
 
@@ -183,9 +192,15 @@ Pour l'instant le code ressemble à ça_ :
 
         <?php
         $nom = null;
+
+        if (!empty($_GET['action']) && $_GET['action'] === 'deconnecter') {
+        unset($_COOKIE['utilisateur']);
+        setcookie('utilisateur', '', time() - 10);
+        }
         if (!empty($_COOKIE['utilisateur'])) {
             $nom = $_COOKIE['utilisateur'];
         }
+
         if (!empty($_POST['nom'])) {
             setcookie('utilisateur', $_POST['nom']);
             $nom = $_POST['nom'];
@@ -197,7 +212,7 @@ Pour l'instant le code ressemble à ça_ :
 
         <?php if ($nom) : ?>
             <h1>Bonjour <?= htmlentities($nom) ?></h1>
-
+            <a href="profil.php?action=deconnecter">Se déconnecter</a>
         <?php else: ?>   
         <form action ="" method="post">
             <div class="form-group">
@@ -209,7 +224,8 @@ Pour l'instant le code ressemble à ça_ :
 
         <?php require 'inc/footer.php'; ?>
 
-## Etape 3.5
+
+_Commentaires en vrac de ce code :_
 
 Quand j'utilise `setcookie()` je peux définir tout de suite la valeur du nom de l'utilisateur en faisant
     $nom = $_POST['nom'];
@@ -224,4 +240,26 @@ _La fonction htmlentities va convertir les caractères spéciaux d’une chaîne
 
 C'est très bien expliqué là dessus, mais en gros c'est pour avoir un bon encodage pour les caractères html.
 
+J'ajoute un bouton  `<a href="profil.php?action=deconnecter">Se déconnecter</a>`, quand l'utilisateur cliquera sur ce bouton le paramètre en GET sera retourné dans l'url
 
+Je veux donc vérifier l'**action** dans une nouvelle condition `GET`
+
+- Si l'action existe ET que l'action est égale au fait de se déconnecter alors on détruit le cookie
+- Si on fait seulement un unset, les cookies seront encore présents dans l'inspecteur ( f12 -> application -> cookies )
+_On utilise la méthode unset pour détruire une variable ( ou une clée dans un tableau )_
+unset détruit juste la variable
+- Si on veut vraiment supprimer tout le cookie on peut le supprimer en lui donnant un temps dans le _passé_ :
+     `setcookie('utilisateur', '', time() - 10)`
+_Permettra de dire que le cookie n'existe pas_
+
+
+```php
+if (!empty($_GET['action']) && $_GET['action'] === 'deconnecter') {
+    unset($_COOKIE['utilisateur']);
+    setcookie('utilisateur', '', time() - 10);
+}
+```
+
+
+
+# 
